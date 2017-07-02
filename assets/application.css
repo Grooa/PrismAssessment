@@ -1,0 +1,147 @@
+#ipBlock-main > .ipWidget.ipWidget-PrismAssessment,
+.ipWidget-PrismAssessment {
+	margin-top: 2em;
+}
+
+.ipWidget-PrismAssessment > div {
+	max-width: 40em;
+	margin: 0 auto;
+
+}
+
+.ipWidget-PrismAssessment .button {
+	float: right;
+	margin: 2em 0;
+}
+
+.ipWidget-PrismAssessment .button.left {
+	float: left;
+}
+
+.ipWidget-PrismAssessment .options label {
+	display: flex;
+	align-items: center;
+	min-height: 3em;
+	padding: 1em;
+	background: #eee;
+	margin: 1em;
+	color: black;
+	cursor: pointer;
+}
+
+.ipWidget-PrismAssessment .options label:hover {
+	background: #aaa;
+}
+
+.ipWidget-PrismAssessment .options input {
+	flex-shrink: 0;
+}
+
+
+.ipWidget-PrismAssessment .email input[type='text'],
+.ipWidget-PrismAssessment .email input[type='email'],
+.ipWidget-PrismAssessment .email label {
+	display: block;
+}
+
+.ipWidget-PrismAssessment .email label {
+	margin: 1em 2em 0;
+}
+
+
+.ipWidget-PrismAssessment .progress {
+	overflow: hidden;
+	margin: 1em 0;
+	width: 100%;
+	height: 0.2em;
+	background: #eee;
+}
+
+.ipWidget-PrismAssessment .progress-bar {
+	height: 100%;
+	background: #800080;
+}
+
+.ipWidget-PrismAssessment .error {
+	margin: 1em;
+	padding: 1em;
+	background: #c60000;
+	color: white;
+}
+
+.ipWidget-PrismAssessment .content {
+	padding: 1em;
+}
+
+/* LeadershipStyles */
+.ipWidget-LeadershipStyles .gold.leadership-style {
+	border-color: #d49c00;
+}
+.ipWidget-LeadershipStyles .green.leadership-style {
+	border-color: #008200;
+}
+.ipWidget-LeadershipStyles .red.leadership-style {
+	border-color: #c60000;
+}
+.ipWidget-LeadershipStyles .blue.leadership-style {
+	border-color: #0080f5;
+}
+
+.ipWidget-LeadershipStyles .gold .header {
+	background: #d49c00;
+}
+.ipWidget-LeadershipStyles .green .header {
+	background: #008200;
+}
+.ipWidget-LeadershipStyles .red .header {
+	background: #c60000;
+}
+.ipWidget-LeadershipStyles .blue .header {
+	background: #0080f5;
+}
+
+.ipWidget-LeadershipStyles > .leadership-style {
+	width: auto;
+}
+
+.ipWidget-LeadershipStyles > .leadership-style h3 {
+	color: white;
+	padding: 0;
+}
+
+.ipWidget-LeadershipStyles > .leadership-style h4 {
+	color: black;
+	font-size: 1.2em;
+}
+
+.ipWidget-LeadershipStyles > .leadership-style {
+	margin: 2em 0;
+	border: 1px solid;
+}
+
+.ipWidget-LeadershipStyles .header {
+	color: white;
+	padding: 1em;
+	cursor: pointer;
+}
+
+.ipWidget-LeadershipStyles .match {
+	float: right;
+	font-size: 2.5em;
+}
+
+.ipWidget-LeadershipStyles .leadership-style > .ipBlock {
+	padding: 1em;
+}
+
+
+
+
+/* ResultsChart */
+.ipWidget-ResultsChart svg {
+	max-width: 30em;
+	width: 100%;
+	height: auto;
+	margin: 0 auto;
+	display: block;
+}

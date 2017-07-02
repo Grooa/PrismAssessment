@@ -1,0 +1,23 @@
+{
+    "title": "PRISM Brain Mapping",
+    "version": "2.00",
+    "name": "PrismAssessment",
+    "description": "PRISM brain mapping mini assessment",
+    "author": "Truls Rustad Fossum",
+	"options": [
+		{
+			"label": "Result page",
+			"name": "resultPage",
+			"hint": "Page with the test results",
+			"type": "Url",
+			"default": ""
+		},
+		{
+			"label": "Result e-mail recipient",
+			"name": "recipientEmail",
+			"hint": "Receives notifications when someone takes the test",
+			"type": "Email",
+			"default": ""
+		}
+	]
+}
