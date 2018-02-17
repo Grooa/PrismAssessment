@@ -3,8 +3,8 @@
 
 namespace Plugin\PrismAssessment;
 
-use \Ip\Form\Validator\Email as EmailValidator;
-use \Ip\Form;
+use Mailgun\Exception\HttpClientException;
+use \Plugin\Mailgun\Model as Mailgun;
 use \Plugin\Mailchimp\Model as MailChimp;
 
 class PublicController extends \Ip\Controller
@@ -33,39 +33,27 @@ class PublicController extends \Ip\Controller
             return new \Ip\Response(null, null, 422);
         }
 
-        $recipient = ipGetOption('PrismAssessment.recipientEmail', 'truls@grooa.com');
+        try {
+            self::sendMessageToUser($data['email'], $data['fname'], $data['link']);
+        } catch(HttpClientException $e) {
+            ipLog()->error('[Fatal Error] CAP-test: ' . $e->getMessage(), [
+                'code' => $e->getCode(),
+                'message' => $e->getMessage()
+            ]);
 
-        // Send mail to admin
-        ipSendEmail(
-            ipGetOptionLang('Config.websiteEmail'),
-            ipGetOptionLang('Config.websiteTitle'),
-            $recipient,
-            $recipient,
-            'New Test Results',
-            "Hi!\r\nSomeone has taken the test at The Clear Mindset. Here are the details:\r\n" .
-            "First name: " . esc($data['fname']) . "\r\n" .
-            "Last name: " . esc($data['lname']) . "\r\n" .
-            "Email: " . esc($data['email']) . "\r\n" .
-            "Newsletters: " . (isset($data['allow_newsletters']) ? 'yes' : 'no'),
-            true, // Urgent
-            false // HTML
-        );
+            return new \Ip\Response(json_encode([
+                'error' => "Something went wrong when trying to deliver the email to you"
+            ]), null, 400);
+        }
 
-        // Send mail to user
-        ipSendEmail(
-            ipGetOptionLang('Config.websiteEmail'),
-            ipGetOptionLang('Config.websiteTitle'),
-            $data['email'],
-            $data['email'],
-            'CAP Test Results',
-            "Hi!\r\nThanks for trying our CAP test. " .
-            "Here is a link for your results:\r\n" . $data['link'] .
-            "\r\n\r\nRemember to book your 20 minutes free debrief call at " .
-            "https://goo.gl/forms/g3FlDUNAUaoVXOHM2" .
-            "\r\n\r\nThe C.L.E.A.R. Mindset",
-            true, // Urgent
-            false // HTML
-        );
+        try {
+            self::sendMessageToAdmin($data, $data['allow_newsletters']);
+        } catch(HttpClientException $e) { // This isn't critical for the user, and can therefore fail silently
+            ipLog()->error('[Fatal Error] CAP-test. Could not notify Admin: ' . $e->getMessage(), [
+                'code' => $e->getCode(),
+                'message' => $e->getMessage()
+            ]);
+        }
 
         if (isset($data['allow_newsletters']) && $data['allow_newsletters'] == true) {
             $member = [
@@ -90,5 +78,86 @@ class PublicController extends \Ip\Controller
         return new \Ip\Response(null, null, 204);
     }
 
+    /**
+     * Sends the notification to the Admin, when a user has taken the CAP test
+     * @param mixed $user
+     * @param boolean $subscribed
+     */
+    private static function sendMessageToAdmin($user, $subscribed) {
+        $to = ipGetOption('PrismAssessment.recipientEmail', 'webmaster@grooa.com');
+        $plain_body = self::buildAdminMessageBody($user, $subscribed);
+
+        ipLog()->info("[Email] CAP Test, sending notification to admin: $to");
+
+        $mg = new Mailgun('webmaster@grooa.com', '[The CLEAR Mindset] CAP new tests results', $to);
+        $mg
+            ->setToName('')
+            ->setFromName("The CLEAR Mindset")
+            ->setReplyTo('webmaster@grooa.com')
+            ->setPlain($plain_body);
+
+        try {
+            $mg
+                ->addTag('cap')
+                ->addTag('admin-notification');
+        } catch(\Exception $e) {
+            // Ignore
+        }
+
+        $mg->send();
+
+        ipLog()->info('[Email] Notification sent');
+    }
+
+    private static function buildAdminMessageBody($user, $subscribed = false) {
+        return sprintf(
+            "Hi!\r\nSomeone has taken the test at The Clear Mindset. Here are the details:\r\n"
+                . "First name: %s\r\n"
+                . "Last name: %s\r\n"
+                . "Email: %s\r\n"
+                . "Subscribed to newsletter: %s",
+            $user['fname'],
+            $user['lname'],
+            $user['email'],
+            $subscribed ? 'YES' : 'NO'
+        );
+    }
+
+    /***
+     * @param string $to Address to the recipient
+     * @param string $to_name Name of the recipient
+     * @param string $link Link to the CAP results
+     */
+    private static function sendMessageToUser($to, $to_name, $link) {
+        $from = ipGetOption('PrismAssessment.recipientEmail', 'webmaster@grooa.com');
+        $plain_body = self::buildMessageBody($link);
+
+        ipLog()->info("[Email] sending to $from");
+
+        $mg = new Mailgun($from, '[The CLEAR Mindset] CAP Test Results', $to);
+        $mg
+            ->setToName($to_name)
+            ->setFromName("Laura Lozza")
+            ->setReplyTo($from)
+            ->setPlain($plain_body)
+            ->addTag('cap')
+            ->addTag('results')
+            ->send();
+
+        ipLog()->info('[Email] message sent');
+    }
+
+    private static function buildMessageBody($results_link) {
+        $debrief_link = "https://goo.gl/forms/g3FlDUNAUaoVXOHM2";
+
+        return sprintf(
+            "Hi!\nThanks for trying our CAP test. You cna find your results here:\r\n\r\n"
+                . "%s"
+                . "\r\n\r\nRemember to book your 20 minutes free debrief call at %s"
+                . "\r\n\r\nBest Regards\r\nThe C.L.E.A.R. Mindset",
+            $results_link,
+            $debrief_link
+        );
+    }
 
 }
